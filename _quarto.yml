@@ -1,0 +1,21 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Haley Hale | Data & Skincare Science"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/hhale1113
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+    css: styles.css
+
+
+
