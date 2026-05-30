@@ -1,0 +1,26 @@
+---
+title: "What's Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction"
+author: "Haley Hale"
+date: "2026-05-30"
+categories: [introduction, data science, personal care]
+description: "An introduction to my senior project predicting consumer satisfaction in the personal care market using ingredient composition and product attributes."
+---
+
+## Overview
+
+For my senior project, I am building a predictive model that uses ingredient composition, price point, product category and other indicators to predict consumer satisfaction scores in the personal care market.
+
+## The Research Question
+
+Can ingredient composition, price point, and product category predict consumer satisfaction scores in the personal care market?
+
+## My Goals
+
+- Collect live product and ingredient data from Sephora using a two-stage scraping pipeline
+- Build a reusable Python package (`ingredientparser`) to parse and structure raw cosmetic ingredient strings
+- Train and compare classification models to predict high vs. low consumer satisfaction
+- Publish a fully reproducible pipeline to GitHub
+
+## Data
+
+Data will be collected via Apify scrapers targeting Sephora's skincare catalog, capturing product attributes, pricing, ratings, and ingredient lists across approximately 2,600 products.

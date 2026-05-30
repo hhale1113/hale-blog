@@ -25,6 +25,41 @@
     "href": "index.html",
     "title": "Haley Hale | Data & Skincare Science",
     "section": "",
-    "text": "Post With Code\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\n\n\nMay 30, 2026\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nMay 27, 2026\n\n\nTristan O’Malley\n\n\n\n\n\nNo matching items"
+    "text": "What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction\n\n\n\nintroduction\n\ndata science\n\npersonal care\n\n\n\nAn introduction to my senior project predicting consumer satisfaction in the personal care market using ingredient composition and product attributes.\n\n\n\n\n\nMay 30, 2026\n\n\nHaley Hale\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/01-introduction/index.html",
+    "href": "posts/01-introduction/index.html",
+    "title": "What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction",
+    "section": "",
+    "text": "For my senior project, I am building a predictive model that uses ingredient composition, price point, product category and other indicators to predict consumer satisfaction scores in the personal care market."
+  },
+  {
+    "objectID": "posts/01-introduction/index.html#overview",
+    "href": "posts/01-introduction/index.html#overview",
+    "title": "What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction",
+    "section": "",
+    "text": "For my senior project, I am building a predictive model that uses ingredient composition, price point, product category and other indicators to predict consumer satisfaction scores in the personal care market."
+  },
+  {
+    "objectID": "posts/01-introduction/index.html#the-research-question",
+    "href": "posts/01-introduction/index.html#the-research-question",
+    "title": "What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction",
+    "section": "The Research Question",
+    "text": "The Research Question\nCan ingredient composition, price point, and product category predict consumer satisfaction scores in the personal care market?"
+  },
+  {
+    "objectID": "posts/01-introduction/index.html#my-goals",
+    "href": "posts/01-introduction/index.html#my-goals",
+    "title": "What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction",
+    "section": "My Goals",
+    "text": "My Goals\n\nCollect live product and ingredient data from Sephora using a two-stage scraping pipeline\nBuild a reusable Python package (ingredientparser) to parse and structure raw cosmetic ingredient strings\nTrain and compare classification models to predict high vs. low consumer satisfaction\nPublish a fully reproducible pipeline to GitHub"
+  },
+  {
+    "objectID": "posts/01-introduction/index.html#data",
+    "href": "posts/01-introduction/index.html#data",
+    "title": "What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction",
+    "section": "Data",
+    "text": "Data\nData will be collected via Apify scrapers targeting Sephora’s skincare catalog, capturing product attributes, pricing, ratings, and ingredient lists across approximately 2,600 products."
   }
 ]
