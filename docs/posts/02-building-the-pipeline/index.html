@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Haley Hale">
+<meta name="dcterms.date" content="2026-06-25">
+<meta name="description" content="A walkthrough of how I collected, cleaned, and structured Sephora product and ingredient data for my senior project, from a two-stage Apify scrape to a modeling-ready Unity Catalog table.">
 
-<title>Haley Hale | Data &amp; Skincare Science</title>
+<title>Building the Pipeline: From Raw Scrape to Modeling-Ready Data – Haley Hale | Data &amp; Skincare Science</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,25 +29,23 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -72,77 +73,19 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
 
-    const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Haley Hale | Data &amp; Skincare Science</span>
     </a>
   </div>
@@ -153,7 +96,7 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
+    <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
@@ -171,110 +114,105 @@ window.Quarto = {
 <!-- content -->
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-left">
-      <h1 class="title">Haley Hale | Data &amp; Skincare Science</h1>
-                      </div>
+    <div class="quarto-title column-body">
+      <h1 class="title">Building the Pipeline: From Raw Scrape to Modeling-Ready Data</h1>
+                  <div>
+        <div class="description">
+          A walkthrough of how I collected, cleaned, and structured Sephora product and ingredient data for my senior project, from a two-stage Apify scrape to a modeling-ready Unity Catalog table.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">data engineering</div>
+                <div class="quarto-category">web scraping</div>
+                <div class="quarto-category">personal care</div>
+              </div>
+                  </div>
   </div>
     
   
-  <div class="quarto-title-meta column-page-left">
+  <div class="quarto-title-meta">
 
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Haley Hale </p>
+            </div>
+    </div>
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 25, 2026</p>
+      </div>
+    </div>
     
       
     </div>
     
   
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(2)</span></div><div class="category" data-category="ZGF0YSUyMGVuZ2luZWVyaW5n">data engineering <span class="quarto-category-count">(1)</span></div><div class="category" data-category="ZGF0YSUyMHNjaWVuY2U=">data science <span class="quarto-category-count">(1)</span></div><div class="category" data-category="aW50cm9kdWN0aW9u">introduction <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cGVyc29uYWwlMjBjYXJl">personal care <span class="quarto-category-count">(2)</span></div><div class="category" data-category="d2ViJTIwc2NyYXBpbmc=">web scraping <span class="quarto-category-count">(1)</span></div></div></div>
+    
 <!-- main -->
-<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
 
+<p>In my <a href="../../posts/01-introduction/index.html">first post</a>, I introduced the question driving this project: can ingredient composition, price point, and product category predict consumer satisfaction in the personal care market? Before I could touch a single model, though, I had to answer a much less glamorous question first: how do you actually get clean, structured data out of a beauty retailer’s website?</p>
+<p>This post walks through that journey — from raw scraped HTML to a modeling-ready table sitting in Unity Catalog. If you’ve ever tried to turn messy real-world data into something a model can use, a lot of this will probably sound familiar.</p>
+<section id="stage-1-scraping-sephora-with-apify" class="level2">
+<h2 class="anchored" data-anchor-id="stage-1-scraping-sephora-with-apify">Stage 1: Scraping Sephora with Apify</h2>
+<p>I used <a href="https://apify.com">Apify</a> to collect data in two stages, because Sephora’s product pages and ingredient/review data live behind different scraping logic.</p>
+<p><strong>Stage one</strong> pulled basic product listings — names, brands, prices, and category info — across the site. <strong>Stage two</strong> went deeper, pulling ingredient lists and review data for each individual product.</p>
+<p>The two-stage approach made sense conceptually, but it came with a real-world wrinkle: the ingredient-scraping actor silently dropped a meaningful chunk of submitted URLs on every run, with no error message to explain why. There was no clean way to predict which URLs would get skipped — it just happened, quietly, every time.</p>
+<p>The fix wasn’t elegant, but it worked: I reran the scrape multiple times, each time checking which products were still missing ingredient data, until I’d captured roughly 96.5% of the catalog. The remaining gap turned out to mostly be discontinued products that had likely been pulled from the site entirely, which made sense.</p>
+<p><strong>Takeaway:</strong> when a scraping tool fails silently, build your pipeline to expect partial results and make rerunning safe, rather than assuming one pass will get you everything.</p>
+</section>
+<section id="stage-2-idempotent-ingestion-into-databricks" class="level2">
+<h2 class="anchored" data-anchor-id="stage-2-idempotent-ingestion-into-databricks">Stage 2: Idempotent Ingestion into Databricks</h2>
+<p>That last point — making reruns safe — became the design principle for how I loaded data into Unity Catalog.</p>
+<p>Early on, I was tempted to just overwrite tables on every run. But once I started rerunning scrapes to catch missing ingredient data, a plain overwrite would have meant redoing work I’d already done, or worse, losing data I already had if a partial rerun failed midway.</p>
+<p>Instead, I built the ingestion pipeline around a simple idea: <strong>only insert what’s actually new.</strong> Concretely, that meant:</p>
+<ul>
+<li>Using a <code>LEFT JOIN</code> against the existing table to identify which incoming rows weren’t already present</li>
+<li>Using <code>MERGE</code> statements so reruns update or insert records without duplicating anything</li>
+</ul>
+<p>This made the whole pipeline idempotent — I could rerun the same ingestion script as many times as I needed (which, given the Apify dropout issue, I needed to do a lot) without worrying about duplicate rows or accidentally clobbering good data.</p>
+<p>I also hit a more mundane technical snag along the way: Delta tables would throw a <code>DELTA_METADATA_MISMATCH</code> error whenever I tried to write a dataframe with a slightly different schema than what already existed (for instance, after adding a new column). The fix was adding <code>.option("overwriteSchema", "true")</code> to the write call — a small thing, but one of those errors that’s confusing the first time you hit it and trivial once you know the fix.</p>
+</section>
+<section id="stage-3-cleaning-the-ingredient-strings" class="level2">
+<h2 class="anchored" data-anchor-id="stage-3-cleaning-the-ingredient-strings">Stage 3: Cleaning the Ingredient Strings</h2>
+<p>Once the raw data was sitting in Unity Catalog, I ran into the messiest part of the whole project: the ingredient strings themselves.</p>
+<p>I expected something like a clean, comma-separated INCI list — <em>Water, Glycerin, Niacinamide, …</em> — for every product. What I actually got was a mix of real ingredient lists tangled up with marketing copy, like:</p>
+<blockquote class="blockquote">
+<p><em>“Ectoin: A super humectant promotes refreshed, healthy-looking skin… -Hexapeptide: A six-amino acid peptide helps reduce the appearance of age-related changes…”</em></p>
+</blockquote>
+<p>Several attempts to clean this didn’t quite work. Anchoring on common starter words like “Aqua” or “Water” failed because plenty of legitimate ingredient lists start with something else entirely (one product’s actual first ingredient was Squalane). Splitting on punctuation patterns like periods and dashes also backfired — it occasionally chopped off real ingredient names that happened to look like the end of a marketing sentence.</p>
+<p>The approach that finally worked was based on a different signal entirely: <strong>structure, not content.</strong> Marketing copy reads like sentences — verbs, articles, descriptive language. INCI ingredient lists read like a tightly packed sequence of short, capitalized chemical names separated by commas. So instead of looking for specific anchor words, I used a regular expression that looks for a long run of comma-separated, capitalized tokens — and treats that run as the “real” ingredient list, discarding anything that came before it.</p>
+<p>It’s not a perfect solution (no regex-based approach to natural-language-adjacent text ever fully is), but it cleanly separated marketing copy from ingredient data across the vast majority of the catalog.</p>
+</section>
+<section id="stage-4-turning-text-into-features-with-ingredientparser" class="level2">
+<h2 class="anchored" data-anchor-id="stage-4-turning-text-into-features-with-ingredientparser">Stage 4: Turning Text into Features with <code>ingredientparser</code></h2>
+<p>With clean(er) ingredient strings in hand, the next step was turning raw text into something a model could actually use. That’s the job of <code>ingredientparser</code>, a small Python package I built specifically for this project.</p>
+<p>At its core, <code>ingredientparser</code> does two things:</p>
+<ol type="1">
+<li><strong>Cleans</strong> raw ingredient strings using the structural approach described above</li>
+<li><strong>Extracts structured features</strong> from the cleaned list — things like ingredient count, whether the product contains specific actives (retinol, niacinamide, hyaluronic acid, vitamin C, and others), and whether it contains common irritants like fragrance</li>
+</ol>
+<p>I cross-referenced ingredient names against <a href="https://www.cosdna.com">CosDNA</a> and <a href="https://incidecoder.com">INCIDecoder</a> to make sure the actives and irritants I was flagging matched real formulation science, rather than just guessing based on what sounded familiar.</p>
+<p>Packaging this as a proper, installable Python library (rather than a one-off script) turned out to matter more than I expected. It meant I could install it consistently across notebooks, write actual unit tests against it, and — eventually — install it directly from a private GitHub repository rather than relying on file-path hacks. I’ll get into the details of that packaging journey in a future post, since it deserves its own write-up.</p>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
+<p>At this point, I had a clean, structured, feature-rich dataset sitting in Unity Catalog — ready for the part of the project I’d actually signed up for: modeling. In my next post, I’ll walk through how I built the binary satisfaction label, trained and compared three classification models, and the (genuinely surprising) finding about what actually predicts consumer satisfaction in this dataset.</p>
 
 
+</section>
 
-
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="ZGF0YSUyMGVuZ2luZWVyaW5nJTJDd2ViJTIwc2NyYXBpbmclMkNwZXJzb25hbCUyMGNhcmU=" data-listing-date-sort="1782367200000" data-listing-file-modified-sort="1782662393227" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1023">
-<div class="thumbnail"><a href="./posts/02-building-the-pipeline/index.html" class="no-external">
-
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/02-building-the-pipeline/index.html" class="no-external">Building the Pipeline: From Raw Scrape to Modeling-Ready Data</a>
-</h3>
-<div class="listing-categories">
-
-<div class="listing-category" onclick="window.quartoListingCategory('ZGF0YSUyMGVuZ2luZWVyaW5n'); return false;">data engineering</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('d2ViJTIwc2NyYXBpbmc='); return false;">web scraping</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('cGVyc29uYWwlMjBjYXJl'); return false;">personal care</div>
-
-</div>
-<div class="delink listing-description"><a href="./posts/02-building-the-pipeline/index.html" class="no-external">
-<p>A walkthrough of how I collected, cleaned, and structured Sephora product and ingredient data for my senior project, from a two-stage Apify scrape to a modeling-ready Unity Catalog table.</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/02-building-the-pipeline/index.html" class="no-external">
-<div class="listing-date">
-Jun 25, 2026
-</div>
-<div class="listing-author">
-Haley Hale
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="aW50cm9kdWN0aW9uJTJDZGF0YSUyMHNjaWVuY2UlMkNwZXJzb25hbCUyMGNhcmU=" data-listing-date-sort="1780120800000" data-listing-file-modified-sort="1780161015420" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="121">
-<div class="thumbnail"><a href="./posts/01-introduction/index.html" class="no-external">
-
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/01-introduction/index.html" class="no-external">What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction</a>
-</h3>
-<div class="listing-categories">
-
-<div class="listing-category" onclick="window.quartoListingCategory('aW50cm9kdWN0aW9u'); return false;">introduction</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('ZGF0YSUyMHNjaWVuY2U='); return false;">data science</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('cGVyc29uYWwlMjBjYXJl'); return false;">personal care</div>
-
-</div>
-<div class="delink listing-description"><a href="./posts/01-introduction/index.html" class="no-external">
-<p>An introduction to my senior project predicting consumer satisfaction in the personal care market using ingredient composition and product attributes.</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/01-introduction/index.html" class="no-external">
-<div class="listing-date">
-May 30, 2026
-</div>
-<div class="listing-author">
-Haley Hale
-</div>
-</a>
-</div>
-</div>
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

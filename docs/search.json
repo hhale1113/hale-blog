@@ -25,7 +25,7 @@
     "href": "index.html",
     "title": "Haley Hale | Data & Skincare Science",
     "section": "",
-    "text": "What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction\n\n\n\nintroduction\n\ndata science\n\npersonal care\n\n\n\nAn introduction to my senior project predicting consumer satisfaction in the personal care market using ingredient composition and product attributes.\n\n\n\n\n\nMay 30, 2026\n\n\nHaley Hale\n\n\n\n\n\nNo matching items"
+    "text": "Building the Pipeline: From Raw Scrape to Modeling-Ready Data\n\n\n\ndata engineering\n\nweb scraping\n\npersonal care\n\n\n\nA walkthrough of how I collected, cleaned, and structured Sephora product and ingredient data for my senior project, from a two-stage Apify scrape to a modeling-ready Unity Catalog table.\n\n\n\n\n\nJun 25, 2026\n\n\nHaley Hale\n\n\n\n\n\n\n\n\n\n\n\n\nWhat’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction\n\n\n\nintroduction\n\ndata science\n\npersonal care\n\n\n\nAn introduction to my senior project predicting consumer satisfaction in the personal care market using ingredient composition and product attributes.\n\n\n\n\n\nMay 30, 2026\n\n\nHaley Hale\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/01-introduction/index.html",
@@ -61,5 +61,47 @@
     "title": "What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction",
     "section": "Data",
     "text": "Data\nData will be collected via Apify scrapers targeting Sephora’s skincare catalog, capturing product attributes, pricing, ratings, and ingredient lists across approximately 2,600 products."
+  },
+  {
+    "objectID": "posts/02-building-the-pipeline/index.html",
+    "href": "posts/02-building-the-pipeline/index.html",
+    "title": "Building the Pipeline: From Raw Scrape to Modeling-Ready Data",
+    "section": "",
+    "text": "In my first post, I introduced the question driving this project: can ingredient composition, price point, and product category predict consumer satisfaction in the personal care market? Before I could touch a single model, though, I had to answer a much less glamorous question first: how do you actually get clean, structured data out of a beauty retailer’s website?\nThis post walks through that journey — from raw scraped HTML to a modeling-ready table sitting in Unity Catalog. If you’ve ever tried to turn messy real-world data into something a model can use, a lot of this will probably sound familiar."
+  },
+  {
+    "objectID": "posts/02-building-the-pipeline/index.html#stage-1-scraping-sephora-with-apify",
+    "href": "posts/02-building-the-pipeline/index.html#stage-1-scraping-sephora-with-apify",
+    "title": "Building the Pipeline: From Raw Scrape to Modeling-Ready Data",
+    "section": "Stage 1: Scraping Sephora with Apify",
+    "text": "Stage 1: Scraping Sephora with Apify\nI used Apify to collect data in two stages, because Sephora’s product pages and ingredient/review data live behind different scraping logic.\nStage one pulled basic product listings — names, brands, prices, and category info — across the site. Stage two went deeper, pulling ingredient lists and review data for each individual product.\nThe two-stage approach made sense conceptually, but it came with a real-world wrinkle: the ingredient-scraping actor silently dropped a meaningful chunk of submitted URLs on every run, with no error message to explain why. There was no clean way to predict which URLs would get skipped — it just happened, quietly, every time.\nThe fix wasn’t elegant, but it worked: I reran the scrape multiple times, each time checking which products were still missing ingredient data, until I’d captured roughly 96.5% of the catalog. The remaining gap turned out to mostly be discontinued products that had likely been pulled from the site entirely, which made sense.\nTakeaway: when a scraping tool fails silently, build your pipeline to expect partial results and make rerunning safe, rather than assuming one pass will get you everything."
+  },
+  {
+    "objectID": "posts/02-building-the-pipeline/index.html#stage-2-idempotent-ingestion-into-databricks",
+    "href": "posts/02-building-the-pipeline/index.html#stage-2-idempotent-ingestion-into-databricks",
+    "title": "Building the Pipeline: From Raw Scrape to Modeling-Ready Data",
+    "section": "Stage 2: Idempotent Ingestion into Databricks",
+    "text": "Stage 2: Idempotent Ingestion into Databricks\nThat last point — making reruns safe — became the design principle for how I loaded data into Unity Catalog.\nEarly on, I was tempted to just overwrite tables on every run. But once I started rerunning scrapes to catch missing ingredient data, a plain overwrite would have meant redoing work I’d already done, or worse, losing data I already had if a partial rerun failed midway.\nInstead, I built the ingestion pipeline around a simple idea: only insert what’s actually new. Concretely, that meant:\n\nUsing a LEFT JOIN against the existing table to identify which incoming rows weren’t already present\nUsing MERGE statements so reruns update or insert records without duplicating anything\n\nThis made the whole pipeline idempotent — I could rerun the same ingestion script as many times as I needed (which, given the Apify dropout issue, I needed to do a lot) without worrying about duplicate rows or accidentally clobbering good data.\nI also hit a more mundane technical snag along the way: Delta tables would throw a DELTA_METADATA_MISMATCH error whenever I tried to write a dataframe with a slightly different schema than what already existed (for instance, after adding a new column). The fix was adding .option(\"overwriteSchema\", \"true\") to the write call — a small thing, but one of those errors that’s confusing the first time you hit it and trivial once you know the fix."
+  },
+  {
+    "objectID": "posts/02-building-the-pipeline/index.html#stage-3-cleaning-the-ingredient-strings",
+    "href": "posts/02-building-the-pipeline/index.html#stage-3-cleaning-the-ingredient-strings",
+    "title": "Building the Pipeline: From Raw Scrape to Modeling-Ready Data",
+    "section": "Stage 3: Cleaning the Ingredient Strings",
+    "text": "Stage 3: Cleaning the Ingredient Strings\nOnce the raw data was sitting in Unity Catalog, I ran into the messiest part of the whole project: the ingredient strings themselves.\nI expected something like a clean, comma-separated INCI list — Water, Glycerin, Niacinamide, … — for every product. What I actually got was a mix of real ingredient lists tangled up with marketing copy, like:\n\n“Ectoin: A super humectant promotes refreshed, healthy-looking skin… -Hexapeptide: A six-amino acid peptide helps reduce the appearance of age-related changes…”\n\nSeveral attempts to clean this didn’t quite work. Anchoring on common starter words like “Aqua” or “Water” failed because plenty of legitimate ingredient lists start with something else entirely (one product’s actual first ingredient was Squalane). Splitting on punctuation patterns like periods and dashes also backfired — it occasionally chopped off real ingredient names that happened to look like the end of a marketing sentence.\nThe approach that finally worked was based on a different signal entirely: structure, not content. Marketing copy reads like sentences — verbs, articles, descriptive language. INCI ingredient lists read like a tightly packed sequence of short, capitalized chemical names separated by commas. So instead of looking for specific anchor words, I used a regular expression that looks for a long run of comma-separated, capitalized tokens — and treats that run as the “real” ingredient list, discarding anything that came before it.\nIt’s not a perfect solution (no regex-based approach to natural-language-adjacent text ever fully is), but it cleanly separated marketing copy from ingredient data across the vast majority of the catalog."
+  },
+  {
+    "objectID": "posts/02-building-the-pipeline/index.html#stage-4-turning-text-into-features-with-ingredientparser",
+    "href": "posts/02-building-the-pipeline/index.html#stage-4-turning-text-into-features-with-ingredientparser",
+    "title": "Building the Pipeline: From Raw Scrape to Modeling-Ready Data",
+    "section": "Stage 4: Turning Text into Features with ingredientparser",
+    "text": "Stage 4: Turning Text into Features with ingredientparser\nWith clean(er) ingredient strings in hand, the next step was turning raw text into something a model could actually use. That’s the job of ingredientparser, a small Python package I built specifically for this project.\nAt its core, ingredientparser does two things:\n\nCleans raw ingredient strings using the structural approach described above\nExtracts structured features from the cleaned list — things like ingredient count, whether the product contains specific actives (retinol, niacinamide, hyaluronic acid, vitamin C, and others), and whether it contains common irritants like fragrance\n\nI cross-referenced ingredient names against CosDNA and INCIDecoder to make sure the actives and irritants I was flagging matched real formulation science, rather than just guessing based on what sounded familiar.\nPackaging this as a proper, installable Python library (rather than a one-off script) turned out to matter more than I expected. It meant I could install it consistently across notebooks, write actual unit tests against it, and — eventually — install it directly from a private GitHub repository rather than relying on file-path hacks. I’ll get into the details of that packaging journey in a future post, since it deserves its own write-up."
+  },
+  {
+    "objectID": "posts/02-building-the-pipeline/index.html#whats-next",
+    "href": "posts/02-building-the-pipeline/index.html#whats-next",
+    "title": "Building the Pipeline: From Raw Scrape to Modeling-Ready Data",
+    "section": "What’s Next",
+    "text": "What’s Next\nAt this point, I had a clean, structured, feature-rich dataset sitting in Unity Catalog — ready for the part of the project I’d actually signed up for: modeling. In my next post, I’ll walk through how I built the binary satisfaction label, trained and compared three classification models, and the (genuinely surprising) finding about what actually predicts consumer satisfaction in this dataset."
   }
 ]
