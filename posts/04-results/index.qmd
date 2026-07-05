@@ -1,0 +1,59 @@
+---
+title: "What Actually Predicts Whether You'll Love a Skincare Product"
+description: "I expected ingredients and price to decide it. Instead, the strongest predictor was the brand's Instagram following, and it runs backwards."
+author: "Haley Hale"
+date: "2026-07-02"
+categories: [modeling, results, machine learning]
+---
+
+Here's the short version, since it surprised me too: across 2,201 Sephora skincare products, a brand's **Instagram following predicted customer satisfaction better than its ingredients or its price**, and the relationship runs *backwards*. The smaller the following, the happier the customers.
+
+This post is how I got there. Every chart lives in the [full analysis notebook](04_analysis.html), where they're interactive. You can hover any point to see the brand behind it.
+
+## The question, and the label
+
+The whole project asked one thing: can what a product is made of, what it costs, and the brand behind it predict whether customers will be satisfied? To make "satisfied" something a model could learn, I split products into **high** and **low** satisfaction at the median rating (4.45), among products with enough reviews to be reliable. That gave a balanced target, roughly a 53/47 split, so the model couldn't cheat by always guessing one class.
+
+## Three models, one winner
+
+I trained three classifiers on the [25 features from the last post](../03-feature-engineering/index.qmd) and compared them on a held-out test set:
+
+| Model | Accuracy | AUC |
+|---|---|---|
+| Logistic regression | 0.55 | 0.590 |
+| Random forest | 0.66 | 0.712 |
+| **Gradient boosting** | **0.66** | **0.714** |
+
+Gradient boosting won, though barely over random forest. The bigger story is the gap between the tree models and logistic regression: a straight-line model could barely beat a coin flip (AUC 0.59), while the tree-based models jumped to ~0.71. That tells you the signal in this data is **non-linear**: the relationships bend, and only flexible models can follow them.
+
+To make sure that 0.71 wasn't a lucky test split, I ran 5-fold cross-validation: **AUC 0.73 ± 0.04**. Steady. And against a majority-class baseline (0.53 accuracy, 0.50 AUC), the model is clearly learning something real, if modest.
+
+## What the model actually leaned on
+
+Here's where the premise fell apart. I expected the formulation features (actives, ingredient count, irritants) to carry the model. They didn't. When I ranked what the model relied on, one feature towered over everything: **brand Instagram followers accounted for about 44% of the model's decisions.** Low price came next at ~17%, ingredient count at ~10%, and everything else trailed off. The ingredient features I'd spent the most effort building were near the bottom.
+
+Even more interesting than *which* feature mattered was *which direction* it pushed. Using SHAP values to read the model's logic, the effect of followers is **inverse**: more followers pushed predictions toward *lower* satisfaction. The [analysis notebook](04_analysis.html) shows this as a SHAP plot, with the high-follower products visibly clustering on the "less satisfied" side.
+
+## The twist, in one number
+
+Grouping brands by follower count makes it plain. Brands with under 100K followers earned high satisfaction **82%** of the time. For the biggest brands (over 10M followers), that dropped to **38%**. The steepest fall happens early: even a modest jump in fame comes with a satisfaction cost.
+
+## Why would that be?
+
+Worth being clear: my model shows a *pattern*, not a *cause*. It can't tell me *why* smaller brands score higher. But a likely driver is **audience fit**. A niche brand's customers usually sought it out. They researched it, they wanted that specific product. Big-brand products get bought on impulse or by people they were never really for, which means more mismatched, disappointed reviewers. A product with a few hundred reviews from devotees will read very differently than one with tens of thousands from the general public.
+
+I also checked whether the finding was fragile. Tightening the definition of "satisfied" to only the top tier of ratings didn't break it. Brand following still led, and ranking performance actually rose. The pattern holds however strictly you define success.
+
+## So what?
+
+The project started from a practical question: how does a new company know whether a product will land well before it launches? The honest answer this data gives is a little humbling and a little encouraging.
+
+Humbling, because **satisfaction isn't something you can reliably engineer in the formula.** Stacking on actives or pricing a certain way didn't separate the winners.
+
+Encouraging, because for a small or new brand, **being small isn't a disadvantage here.** If anything, it lines up with the outcome you want. The thing a newcomer lacks, a giant following, is the very thing associated with *lower* satisfaction.
+
+None of this proves that buying followers would tank your ratings, or that going viral dooms a product. It's correlation, on one retailer, at one moment in time, from a model that's a useful lens rather than a crystal ball. But as a lens, it points somewhere genuinely counterintuitive: in skincare, *who* makes a product predicts satisfaction better than *what's in it*.
+
+---
+
+*Want the full analysis, with every chart, the code, and the model internals? [See the complete notebook](04_analysis.html).*

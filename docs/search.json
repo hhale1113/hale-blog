@@ -25,7 +25,7 @@
     "href": "index.html",
     "title": "Haley Hale | Data & Skincare Science",
     "section": "",
-    "text": "Teaching a Model to Read an Ingredient List\n\n\n\nfeature engineering\n\npython\n\npackaging\n\n\n\nTurning messy INCI strings, prices, and brand data into 25 model-ready features — and the Python package that does the parsing.\n\n\n\n\n\nJun 30, 2026\n\n\nHaley Hale\n\n\n\n\n\n\n\n\n\n\n\n\nBuilding the Pipeline: From Raw Scrape to Modeling-Ready Data\n\n\n\ndata engineering\n\nweb scraping\n\npersonal care\n\n\n\nA walkthrough of how I collected, cleaned, and structured Sephora product and ingredient data for my senior project, from a two-stage Apify scrape to a modeling-ready Unity Catalog table.\n\n\n\n\n\nJun 25, 2026\n\n\nHaley Hale\n\n\n\n\n\n\n\n\n\n\n\n\nWhat’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction\n\n\n\nintroduction\n\ndata science\n\npersonal care\n\n\n\nAn introduction to my senior project predicting consumer satisfaction in the personal care market using ingredient composition and product attributes.\n\n\n\n\n\nMay 30, 2026\n\n\nHaley Hale\n\n\n\n\n\nNo matching items"
+    "text": "What Actually Predicts Whether You’ll Love a Skincare Product\n\n\n\nmodeling\n\nresults\n\nmachine learning\n\n\n\nI expected ingredients and price to decide it. Instead, the strongest predictor was the brand’s Instagram following, and it runs backwards.\n\n\n\n\n\nJul 2, 2026\n\n\nHaley Hale\n\n\n\n\n\n\n\n\n\n\n\n\nTeaching a Model to Read an Ingredient List\n\n\n\nfeature engineering\n\npython\n\npackaging\n\n\n\nTurning messy INCI strings, prices, and brand data into 25 model-ready features — and the Python package that does the parsing.\n\n\n\n\n\nJun 30, 2026\n\n\nHaley Hale\n\n\n\n\n\n\n\n\n\n\n\n\nBuilding the Pipeline: From Raw Scrape to Modeling-Ready Data\n\n\n\ndata engineering\n\nweb scraping\n\npersonal care\n\n\n\nA walkthrough of how I collected, cleaned, and structured Sephora product and ingredient data for my senior project, from a two-stage Apify scrape to a modeling-ready Unity Catalog table.\n\n\n\n\n\nJun 25, 2026\n\n\nHaley Hale\n\n\n\n\n\n\n\n\n\n\n\n\nWhat’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction\n\n\n\nintroduction\n\ndata science\n\npersonal care\n\n\n\nAn introduction to my senior project predicting consumer satisfaction in the personal care market using ingredient composition and product attributes.\n\n\n\n\n\nMay 30, 2026\n\n\nHaley Hale\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/01-introduction/index.html",
@@ -145,5 +145,152 @@
     "title": "Teaching a Model to Read an Ingredient List",
     "section": "What I expected — and a hint of what happened",
     "text": "What I expected — and a hint of what happened\nGoing in, my money was on the formulation features. It seemed obvious: a well-formulated product with the right actives and no irritants should earn happier customers. That was the whole premise.\nThe model had other ideas. When I trained it and looked at what it actually leaned on, the formulation features — the ones I’d spent the most effort building — barely moved the needle. The brand signals did.\nThat’s the subject of the next post."
+  },
+  {
+    "objectID": "posts/04-results/post4_index.html",
+    "href": "posts/04-results/post4_index.html",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "",
+    "text": "Here’s the short version, since it surprised me too: across 2,201 Sephora skincare products, a brand’s Instagram following predicted customer satisfaction better than its ingredients or its price — and the relationship runs backwards. The smaller the following, the happier the customers.\nThis post is how I got there."
+  },
+  {
+    "objectID": "posts/04-results/post4_index.html#the-question-and-the-label",
+    "href": "posts/04-results/post4_index.html#the-question-and-the-label",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "The question, and the label",
+    "text": "The question, and the label\nThe whole project asked one thing: can what a product is made of, what it costs, and the brand behind it predict whether customers will be satisfied? To make “satisfied” something a model could learn, I split products into high and low satisfaction at the median rating (4.45), among products with enough reviews to be reliable. That gave a balanced target — roughly a 53/47 split — so the model couldn’t cheat by always guessing one class."
+  },
+  {
+    "objectID": "posts/04-results/post4_index.html#three-models-one-winner",
+    "href": "posts/04-results/post4_index.html#three-models-one-winner",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "Three models, one winner",
+    "text": "Three models, one winner\nI trained three classifiers on the 25 features from the last post and compared them on a held-out test set:\n\n\n\nModel\nAccuracy\nAUC\n\n\n\n\nLogistic regression\n0.55\n0.590\n\n\nRandom forest\n0.66\n0.712\n\n\nGradient boosting\n0.66\n0.714\n\n\n\nGradient boosting won, though barely over random forest. The bigger story is the gap between the tree models and logistic regression: a straight-line model could barely beat a coin flip (AUC 0.59), while the tree-based models jumped to ~0.71. That tells you the signal in this data is non-linear — the relationships bend, and only flexible models can follow them.\nTo make sure that 0.71 wasn’t a lucky test split, I ran 5-fold cross-validation: AUC 0.73 ± 0.04. Steady. And against a majority-class baseline (0.53 accuracy, 0.50 AUC), the model is clearly learning something real, if modest."
+  },
+  {
+    "objectID": "posts/04-results/post4_index.html#what-the-model-actually-leaned-on",
+    "href": "posts/04-results/post4_index.html#what-the-model-actually-leaned-on",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "What the model actually leaned on",
+    "text": "What the model actually leaned on\nHere’s where the premise fell apart. I expected the formulation features — actives, ingredient count, irritants — to carry the model. They didn’t. When I ranked what the model relied on, one feature towered over everything:\n\n\n\nSHAP feature importance — brand Instagram followers dominates, with ingredients and price far behind.\n\n\nBrand Instagram followers accounted for about 44% of the model’s decisions. Low price came next at ~17%, ingredient count at ~10%, and everything else trailed off. The ingredient features I’d spent the most effort building were near the bottom.\nEven more interesting than which feature mattered was which direction it pushed. Using SHAP values to read the model’s logic, the effect of followers is inverse: more followers pushed predictions toward lower satisfaction."
+  },
+  {
+    "objectID": "posts/04-results/post4_index.html#the-twist-in-one-chart",
+    "href": "posts/04-results/post4_index.html#the-twist-in-one-chart",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "The twist, in one chart",
+    "text": "The twist, in one chart\nGrouping brands by follower count makes it plain:\n\n\n\nHigh-satisfaction rate falls as brand following grows.\n\n\nBrands with under 100K followers earned high satisfaction 82% of the time. For the biggest brands — over 10M followers — that dropped to 38%. The steepest fall happens early: even a modest jump in fame comes with a satisfaction cost."
+  },
+  {
+    "objectID": "posts/04-results/post4_index.html#why-would-that-be",
+    "href": "posts/04-results/post4_index.html#why-would-that-be",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "Why would that be?",
+    "text": "Why would that be?\nWorth being clear: my model shows a pattern, not a cause. It can’t tell me why smaller brands score higher. But a likely driver is audience fit. A niche brand’s customers usually sought it out — they researched it, they wanted that specific product. Big-brand products get bought on impulse or by people they were never really for, which means more mismatched, disappointed reviewers. A product with a few hundred reviews from devotees will read very differently than one with tens of thousands from the general public.\nI also checked whether the finding was fragile. Tightening the definition of “satisfied” to only the top tier of ratings didn’t break it — brand following still led, and ranking performance actually rose. The pattern holds however strictly you define success."
+  },
+  {
+    "objectID": "posts/04-results/post4_index.html#so-what",
+    "href": "posts/04-results/post4_index.html#so-what",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "So what?",
+    "text": "So what?\nThe project started from a practical question: how does a new company know whether a product will land well before it launches? The honest answer this data gives is a little humbling and a little encouraging.\nHumbling, because satisfaction isn’t something you can reliably engineer in the formula. Stacking on actives or pricing a certain way didn’t separate the winners.\nEncouraging, because for a small or new brand, being small isn’t a disadvantage here — if anything, it lines up with the outcome you want. The thing a newcomer lacks, a giant following, is the very thing associated with lower satisfaction.\nNone of this proves that buying followers would tank your ratings, or that going viral dooms a product. It’s correlation, on one retailer, at one moment in time, from a model that’s a useful lens rather than a crystal ball. But as a lens, it points somewhere genuinely counterintuitive: in skincare, who makes a product predicts satisfaction better than what’s in it."
+  },
+  {
+    "objectID": "posts/04-results/index.html",
+    "href": "posts/04-results/index.html",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "",
+    "text": "Here’s the short version, since it surprised me too: across 2,201 Sephora skincare products, a brand’s Instagram following predicted customer satisfaction better than its ingredients or its price, and the relationship runs backwards. The smaller the following, the happier the customers.\nThis post is how I got there. Every chart lives in the full analysis notebook, where they’re interactive. You can hover any point to see the brand behind it."
+  },
+  {
+    "objectID": "posts/04-results/index.html#the-question-and-the-label",
+    "href": "posts/04-results/index.html#the-question-and-the-label",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "The question, and the label",
+    "text": "The question, and the label\nThe whole project asked one thing: can what a product is made of, what it costs, and the brand behind it predict whether customers will be satisfied? To make “satisfied” something a model could learn, I split products into high and low satisfaction at the median rating (4.45), among products with enough reviews to be reliable. That gave a balanced target, roughly a 53/47 split, so the model couldn’t cheat by always guessing one class."
+  },
+  {
+    "objectID": "posts/04-results/index.html#three-models-one-winner",
+    "href": "posts/04-results/index.html#three-models-one-winner",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "Three models, one winner",
+    "text": "Three models, one winner\nI trained three classifiers on the 25 features from the last post and compared them on a held-out test set:\n\n\n\nModel\nAccuracy\nAUC\n\n\n\n\nLogistic regression\n0.55\n0.590\n\n\nRandom forest\n0.66\n0.712\n\n\nGradient boosting\n0.66\n0.714\n\n\n\nGradient boosting won, though barely over random forest. The bigger story is the gap between the tree models and logistic regression: a straight-line model could barely beat a coin flip (AUC 0.59), while the tree-based models jumped to ~0.71. That tells you the signal in this data is non-linear: the relationships bend, and only flexible models can follow them.\nTo make sure that 0.71 wasn’t a lucky test split, I ran 5-fold cross-validation: AUC 0.73 ± 0.04. Steady. And against a majority-class baseline (0.53 accuracy, 0.50 AUC), the model is clearly learning something real, if modest."
+  },
+  {
+    "objectID": "posts/04-results/index.html#what-the-model-actually-leaned-on",
+    "href": "posts/04-results/index.html#what-the-model-actually-leaned-on",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "What the model actually leaned on",
+    "text": "What the model actually leaned on\nHere’s where the premise fell apart. I expected the formulation features (actives, ingredient count, irritants) to carry the model. They didn’t. When I ranked what the model relied on, one feature towered over everything: brand Instagram followers accounted for about 44% of the model’s decisions. Low price came next at ~17%, ingredient count at ~10%, and everything else trailed off. The ingredient features I’d spent the most effort building were near the bottom.\nEven more interesting than which feature mattered was which direction it pushed. Using SHAP values to read the model’s logic, the effect of followers is inverse: more followers pushed predictions toward lower satisfaction. The analysis notebook shows this as a SHAP plot, with the high-follower products visibly clustering on the “less satisfied” side."
+  },
+  {
+    "objectID": "posts/04-results/index.html#the-twist-in-one-chart",
+    "href": "posts/04-results/index.html#the-twist-in-one-chart",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "The twist, in one chart",
+    "text": "The twist, in one chart\nGrouping brands by follower count makes it plain:\n\n\n\nHigh-satisfaction rate falls as brand following grows.\n\n\nBrands with under 100K followers earned high satisfaction 82% of the time. For the biggest brands — over 10M followers — that dropped to 38%. The steepest fall happens early: even a modest jump in fame comes with a satisfaction cost."
+  },
+  {
+    "objectID": "posts/04-results/index.html#why-would-that-be",
+    "href": "posts/04-results/index.html#why-would-that-be",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "Why would that be?",
+    "text": "Why would that be?\nWorth being clear: my model shows a pattern, not a cause. It can’t tell me why smaller brands score higher. But a likely driver is audience fit. A niche brand’s customers usually sought it out. They researched it, they wanted that specific product. Big-brand products get bought on impulse or by people they were never really for, which means more mismatched, disappointed reviewers. A product with a few hundred reviews from devotees will read very differently than one with tens of thousands from the general public.\nI also checked whether the finding was fragile. Tightening the definition of “satisfied” to only the top tier of ratings didn’t break it. Brand following still led, and ranking performance actually rose. The pattern holds however strictly you define success."
+  },
+  {
+    "objectID": "posts/04-results/index.html#so-what",
+    "href": "posts/04-results/index.html#so-what",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "So what?",
+    "text": "So what?\nThe project started from a practical question: how does a new company know whether a product will land well before it launches? The honest answer this data gives is a little humbling and a little encouraging.\nHumbling, because satisfaction isn’t something you can reliably engineer in the formula. Stacking on actives or pricing a certain way didn’t separate the winners.\nEncouraging, because for a small or new brand, being small isn’t a disadvantage here. If anything, it lines up with the outcome you want. The thing a newcomer lacks, a giant following, is the very thing associated with lower satisfaction.\nNone of this proves that buying followers would tank your ratings, or that going viral dooms a product. It’s correlation, on one retailer, at one moment in time, from a model that’s a useful lens rather than a crystal ball. But as a lens, it points somewhere genuinely counterintuitive: in skincare, who makes a product predicts satisfaction better than what’s in it.\n\nWant the full analysis, with every chart, the code, and the model internals? See the complete notebook."
+  },
+  {
+    "objectID": "posts/03-feature-engineering/index.html",
+    "href": "posts/03-feature-engineering/index.html",
+    "title": "Teaching a Model to Read an Ingredient List",
+    "section": "",
+    "text": "If you flip a moisturizer over, the ingredient list looks like this:\nThat’s a paragraph of text. A model can’t do anything with a paragraph — it needs numbers. Getting from one to the other is called feature engineering, and it’s where a surprising amount of this project’s real work lived. This post is about how I turned an ingredient list (plus a price and a brand) into 25 numbers a model could actually learn from."
+  },
+  {
+    "objectID": "posts/03-feature-engineering/index.html#the-problem-ingredient-lists-are-text-not-data",
+    "href": "posts/03-feature-engineering/index.html#the-problem-ingredient-lists-are-text-not-data",
+    "title": "Teaching a Model to Read an Ingredient List",
+    "section": "The problem: ingredient lists are text, not data",
+    "text": "The problem: ingredient lists are text, not data\nEvery product in my dataset came with a raw INCI string — the standardized ingredient list. To compare products, I needed consistent, numeric answers to questions like: How many ingredients does it have? Does it contain a known active like niacinamide or retinol? How many potential irritants? Is there added fragrance?\nDoing that by hand across 2,201 products wasn’t happening. So I built a small tool to do it."
+  },
+  {
+    "objectID": "posts/03-feature-engineering/index.html#the-ingredientparser-package",
+    "href": "posts/03-feature-engineering/index.html#the-ingredientparser-package",
+    "title": "Teaching a Model to Read an Ingredient List",
+    "section": "The ingredientparser package",
+    "text": "The ingredientparser package\nRather than bury this logic in a notebook cell, I packaged it. ingredientparser takes a raw ingredient string and returns a structured set of features:\nfrom ingredientparser import parse_ingredients\n\nfeatures = parse_ingredients(\"Water, Glycerin, Niacinamide, Retinol, Fragrance\")\n\n# {\n#   \"ingredient_count\": 5,\n#   \"has_niacinamide\": 1,\n#   \"has_retinol\": 1,\n#   \"has_hyaluronic_acid\": 0,\n#   \"has_vitamin_c\": 0,\n#   \"active_count\": 2,\n#   \"irritant_count\": 1,\n#   \"has_fragrance\": 1,\n# }\nThe “known actives” and “irritants” it looks for come from reference lists I built using CosDNA and INCIDecoder, so the flags reflect how the skincare world actually categorizes ingredients.\nI made it a proper package rather than a loose function on purpose. It has a src/ layout, a pyproject.toml, and a small pytest suite, and it lives in a GitHub repo. That means I can install it straight into Databricks from the repo, version it, and hand it to someone else without copying and pasting code. For a project meant to be reproducible, that mattered more than it might sound — it turned a one-off script into a reusable piece of infrastructure."
+  },
+  {
+    "objectID": "posts/03-feature-engineering/index.html#beyond-ingredients-engineering-more-signal",
+    "href": "posts/03-feature-engineering/index.html#beyond-ingredients-engineering-more-signal",
+    "title": "Teaching a Model to Read an Ingredient List",
+    "section": "Beyond ingredients: engineering more signal",
+    "text": "Beyond ingredients: engineering more signal\nIngredients are only part of a product. So I built out three more groups of features.\nPrice. Beyond the raw low and high price, I added a price_range (the spread between them) and a value_tier that buckets products into budget, mid, and luxury, then one-hot encoded it.\ndf[\"price_range\"] = df[\"high_price\"] - df[\"low_price\"]\nInteractions. Some things might matter more in combination than alone. For example, a bestseller that also contains an active, or niacinamide without fragrance (a combination that tends to signal a more clinical, sensitive-skin-friendly formula).\ndf[\"niacinamide_no_fragrance\"] = df[\"has_niacinamide\"] * (1 - df[\"has_fragrance\"])\nBrand signals. This is the group that ended up mattering most — though I didn’t know that yet. Using a hand-curated reference file, I added whether a brand is celebrity-owned or dermatologist-owned, and the brand’s Instagram follower count."
+  },
+  {
+    "objectID": "posts/03-feature-engineering/index.html#the-final-roster-25-features",
+    "href": "posts/03-feature-engineering/index.html#the-final-roster-25-features",
+    "title": "Teaching a Model to Read an Ingredient List",
+    "section": "The final roster: 25 features",
+    "text": "The final roster: 25 features\nGrouped, the model’s inputs looked like this:\n\nFormulation: ingredient count, has retinol / niacinamide / hyaluronic acid / vitamin C, active count, irritant count, has fragrance\nProduct: low and high price, bestseller, new, Sephora-exclusive, online-only\nEngineered: price range, value tier (budget / mid / luxury), and the interaction features\nBrand signal: Instagram followers, celebrity-owned, dermatologist-owned"
+  },
+  {
+    "objectID": "posts/03-feature-engineering/index.html#what-i-expected-and-a-hint-of-what-happened",
+    "href": "posts/03-feature-engineering/index.html#what-i-expected-and-a-hint-of-what-happened",
+    "title": "Teaching a Model to Read an Ingredient List",
+    "section": "What I expected — and a hint of what happened",
+    "text": "What I expected — and a hint of what happened\nGoing in, my money was on the formulation features. It seemed obvious: a well-formulated product with the right actives and no irritants should earn happier customers. That was the whole premise.\nThe model had other ideas. When I trained it and looked at what it actually leaned on, the formulation features — the ones I’d spent the most effort building — barely moved the needle. The brand signals did.\nThat’s the subject of the next post."
+  },
+  {
+    "objectID": "posts/04-results/index.html#the-twist-in-one-number",
+    "href": "posts/04-results/index.html#the-twist-in-one-number",
+    "title": "What Actually Predicts Whether You’ll Love a Skincare Product",
+    "section": "The twist, in one number",
+    "text": "The twist, in one number\nGrouping brands by follower count makes it plain. Brands with under 100K followers earned high satisfaction 82% of the time. For the biggest brands (over 10M followers), that dropped to 38%. The steepest fall happens early: even a modest jump in fame comes with a satisfaction cost."
   }
 ]
