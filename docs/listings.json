@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/03-feature-engineering/post3_index.html",
       "/posts/02-building-the-pipeline/index.html",
       "/posts/01-introduction/index.html"
     ]

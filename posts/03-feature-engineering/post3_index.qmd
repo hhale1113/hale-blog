@@ -1,0 +1,79 @@
+---
+title: "Teaching a Model to Read an Ingredient List"
+description: "Turning messy INCI strings, prices, and brand data into 25 model-ready features — and the Python package that does the parsing."
+author: "Haley Hale"
+date: "2026-06-30"
+categories: [feature engineering, python, packaging]
+---
+
+If you flip a moisturizer over, the ingredient list looks like this:
+
+> Water, Glycerin, Niacinamide, Dimethicone, Phenoxyethanol, Retinol, Fragrance...
+
+That's a paragraph of text. A model can't do anything with a paragraph — it needs numbers. Getting from one to the other is called feature engineering, and it's where a surprising amount of this project's real work lived. This post is about how I turned an ingredient list (plus a price and a brand) into 25 numbers a model could actually learn from.
+
+## The problem: ingredient lists are text, not data
+
+Every product in my dataset came with a raw INCI string — the standardized ingredient list. To compare products, I needed consistent, numeric answers to questions like: *How many ingredients does it have? Does it contain a known active like niacinamide or retinol? How many potential irritants? Is there added fragrance?*
+
+Doing that by hand across 2,201 products wasn't happening. So I built a small tool to do it.
+
+## The `ingredientparser` package
+
+Rather than bury this logic in a notebook cell, I packaged it. `ingredientparser` takes a raw ingredient string and returns a structured set of features:
+
+```python
+from ingredientparser import parse_ingredients
+
+features = parse_ingredients("Water, Glycerin, Niacinamide, Retinol, Fragrance")
+
+# {
+#   "ingredient_count": 5,
+#   "has_niacinamide": 1,
+#   "has_retinol": 1,
+#   "has_hyaluronic_acid": 0,
+#   "has_vitamin_c": 0,
+#   "active_count": 2,
+#   "irritant_count": 1,
+#   "has_fragrance": 1,
+# }
+```
+
+The "known actives" and "irritants" it looks for come from reference lists I built using [CosDNA](https://cosdna.com) and [INCIDecoder](https://incidecoder.com), so the flags reflect how the skincare world actually categorizes ingredients.
+
+I made it a proper package rather than a loose function on purpose. It has a `src/` layout, a `pyproject.toml`, and a small `pytest` suite, and it lives in a [GitHub repo](https://github.com/hhale1113/ingredientparser). That means I can install it straight into Databricks from the repo, version it, and hand it to someone else without copying and pasting code. For a project meant to be reproducible, that mattered more than it might sound — it turned a one-off script into a reusable piece of infrastructure.
+
+## Beyond ingredients: engineering more signal
+
+Ingredients are only part of a product. So I built out three more groups of features.
+
+**Price.** Beyond the raw low and high price, I added a `price_range` (the spread between them) and a `value_tier` that buckets products into budget, mid, and luxury, then one-hot encoded it.
+
+```python
+df["price_range"] = df["high_price"] - df["low_price"]
+```
+
+**Interactions.** Some things might matter more in combination than alone. For example, a bestseller *that also contains an active*, or niacinamide *without* fragrance (a combination that tends to signal a more clinical, sensitive-skin-friendly formula).
+
+```python
+df["niacinamide_no_fragrance"] = df["has_niacinamide"] * (1 - df["has_fragrance"])
+```
+
+**Brand signals.** This is the group that ended up mattering most — though I didn't know that yet. Using a hand-curated reference file, I added whether a brand is celebrity-owned or dermatologist-owned, and the brand's Instagram follower count.
+
+## The final roster: 25 features
+
+Grouped, the model's inputs looked like this:
+
+- **Formulation:** ingredient count, has retinol / niacinamide / hyaluronic acid / vitamin C, active count, irritant count, has fragrance
+- **Product:** low and high price, bestseller, new, Sephora-exclusive, online-only
+- **Engineered:** price range, value tier (budget / mid / luxury), and the interaction features
+- **Brand signal:** Instagram followers, celebrity-owned, dermatologist-owned
+
+## What I expected — and a hint of what happened
+
+Going in, my money was on the formulation features. It seemed obvious: a well-formulated product with the right actives and no irritants should earn happier customers. That was the whole premise.
+
+The model had other ideas. When I trained it and looked at what it actually leaned on, the formulation features — the ones I'd spent the most effort building — barely moved the needle. The brand signals did.
+
+That's the subject of the next post.

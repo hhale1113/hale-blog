@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Haley Hale">
+<meta name="dcterms.date" content="2026-06-30">
+<meta name="description" content="Turning messy INCI strings, prices, and brand data into 25 model-ready features — and the Python package that does the parsing.">
 
-<title>Haley Hale | Data &amp; Skincare Science</title>
+<title>Teaching a Model to Read an Ingredient List – Haley Hale | Data &amp; Skincare Science</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -23,28 +26,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -72,77 +108,19 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
 
-    const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Haley Hale | Data &amp; Skincare Science</span>
     </a>
   </div>
@@ -153,7 +131,7 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
+    <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
@@ -171,144 +149,112 @@ window.Quarto = {
 <!-- content -->
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-left">
-      <h1 class="title">Haley Hale | Data &amp; Skincare Science</h1>
-                      </div>
+    <div class="quarto-title column-body">
+      <h1 class="title">Teaching a Model to Read an Ingredient List</h1>
+                  <div>
+        <div class="description">
+          Turning messy INCI strings, prices, and brand data into 25 model-ready features — and the Python package that does the parsing.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">feature engineering</div>
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">packaging</div>
+              </div>
+                  </div>
   </div>
     
   
-  <div class="quarto-title-meta column-page-left">
+  <div class="quarto-title-meta">
 
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Haley Hale </p>
+            </div>
+    </div>
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 30, 2026</p>
+      </div>
+    </div>
     
       
     </div>
     
   
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(3)</span></div><div class="category" data-category="ZGF0YSUyMGVuZ2luZWVyaW5n">data engineering <span class="quarto-category-count">(1)</span></div><div class="category" data-category="ZGF0YSUyMHNjaWVuY2U=">data science <span class="quarto-category-count">(1)</span></div><div class="category" data-category="ZmVhdHVyZSUyMGVuZ2luZWVyaW5n">feature engineering <span class="quarto-category-count">(1)</span></div><div class="category" data-category="aW50cm9kdWN0aW9u">introduction <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cGFja2FnaW5n">packaging <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cGVyc29uYWwlMjBjYXJl">personal care <span class="quarto-category-count">(2)</span></div><div class="category" data-category="cHl0aG9u">python <span class="quarto-category-count">(1)</span></div><div class="category" data-category="d2ViJTIwc2NyYXBpbmc=">web scraping <span class="quarto-category-count">(1)</span></div></div></div>
+    
 <!-- main -->
-<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
 
+<p>If you flip a moisturizer over, the ingredient list looks like this:</p>
+<blockquote class="blockquote">
+<p>Water, Glycerin, Niacinamide, Dimethicone, Phenoxyethanol, Retinol, Fragrance…</p>
+</blockquote>
+<p>That’s a paragraph of text. A model can’t do anything with a paragraph — it needs numbers. Getting from one to the other is called feature engineering, and it’s where a surprising amount of this project’s real work lived. This post is about how I turned an ingredient list (plus a price and a brand) into 25 numbers a model could actually learn from.</p>
+<section id="the-problem-ingredient-lists-are-text-not-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-ingredient-lists-are-text-not-data">The problem: ingredient lists are text, not data</h2>
+<p>Every product in my dataset came with a raw INCI string — the standardized ingredient list. To compare products, I needed consistent, numeric answers to questions like: <em>How many ingredients does it have? Does it contain a known active like niacinamide or retinol? How many potential irritants? Is there added fragrance?</em></p>
+<p>Doing that by hand across 2,201 products wasn’t happening. So I built a small tool to do it.</p>
+</section>
+<section id="the-ingredientparser-package" class="level2">
+<h2 class="anchored" data-anchor-id="the-ingredientparser-package">The <code>ingredientparser</code> package</h2>
+<p>Rather than bury this logic in a notebook cell, I packaged it. <code>ingredientparser</code> takes a raw ingredient string and returns a structured set of features:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ingredientparser <span class="im">import</span> parse_ingredients</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> parse_ingredients(<span class="st">"Water, Glycerin, Niacinamide, Retinol, Fragrance"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># {</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   "ingredient_count": 5,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   "has_niacinamide": 1,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   "has_retinol": 1,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   "has_hyaluronic_acid": 0,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   "has_vitamin_c": 0,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   "active_count": 2,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   "irritant_count": 1,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   "has_fragrance": 1,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The “known actives” and “irritants” it looks for come from reference lists I built using <a href="https://cosdna.com">CosDNA</a> and <a href="https://incidecoder.com">INCIDecoder</a>, so the flags reflect how the skincare world actually categorizes ingredients.</p>
+<p>I made it a proper package rather than a loose function on purpose. It has a <code>src/</code> layout, a <code>pyproject.toml</code>, and a small <code>pytest</code> suite, and it lives in a <a href="https://github.com/hhale1113/ingredientparser">GitHub repo</a>. That means I can install it straight into Databricks from the repo, version it, and hand it to someone else without copying and pasting code. For a project meant to be reproducible, that mattered more than it might sound — it turned a one-off script into a reusable piece of infrastructure.</p>
+</section>
+<section id="beyond-ingredients-engineering-more-signal" class="level2">
+<h2 class="anchored" data-anchor-id="beyond-ingredients-engineering-more-signal">Beyond ingredients: engineering more signal</h2>
+<p>Ingredients are only part of a product. So I built out three more groups of features.</p>
+<p><strong>Price.</strong> Beyond the raw low and high price, I added a <code>price_range</code> (the spread between them) and a <code>value_tier</code> that buckets products into budget, mid, and luxury, then one-hot encoded it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"price_range"</span>] <span class="op">=</span> df[<span class="st">"high_price"</span>] <span class="op">-</span> df[<span class="st">"low_price"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Interactions.</strong> Some things might matter more in combination than alone. For example, a bestseller <em>that also contains an active</em>, or niacinamide <em>without</em> fragrance (a combination that tends to signal a more clinical, sensitive-skin-friendly formula).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"niacinamide_no_fragrance"</span>] <span class="op">=</span> df[<span class="st">"has_niacinamide"</span>] <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> df[<span class="st">"has_fragrance"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Brand signals.</strong> This is the group that ended up mattering most — though I didn’t know that yet. Using a hand-curated reference file, I added whether a brand is celebrity-owned or dermatologist-owned, and the brand’s Instagram follower count.</p>
+</section>
+<section id="the-final-roster-25-features" class="level2">
+<h2 class="anchored" data-anchor-id="the-final-roster-25-features">The final roster: 25 features</h2>
+<p>Grouped, the model’s inputs looked like this:</p>
+<ul>
+<li><strong>Formulation:</strong> ingredient count, has retinol / niacinamide / hyaluronic acid / vitamin C, active count, irritant count, has fragrance</li>
+<li><strong>Product:</strong> low and high price, bestseller, new, Sephora-exclusive, online-only</li>
+<li><strong>Engineered:</strong> price range, value tier (budget / mid / luxury), and the interaction features</li>
+<li><strong>Brand signal:</strong> Instagram followers, celebrity-owned, dermatologist-owned</li>
+</ul>
+</section>
+<section id="what-i-expected-and-a-hint-of-what-happened" class="level2">
+<h2 class="anchored" data-anchor-id="what-i-expected-and-a-hint-of-what-happened">What I expected — and a hint of what happened</h2>
+<p>Going in, my money was on the formulation features. It seemed obvious: a well-formulated product with the right actives and no irritants should earn happier customers. That was the whole premise.</p>
+<p>The model had other ideas. When I trained it and looked at what it actually leaned on, the formulation features — the ones I’d spent the most effort building — barely moved the needle. The brand signals did.</p>
+<p>That’s the subject of the next post.</p>
 
 
+</section>
 
-
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="ZmVhdHVyZSUyMGVuZ2luZWVyaW5nJTJDcHl0aG9uJTJDcGFja2FnaW5n" data-listing-date-sort="1782799200000" data-listing-file-modified-sort="1783274998542" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="601">
-<div class="thumbnail"><a href="./posts/03-feature-engineering/post3_index.html" class="no-external">
-
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/03-feature-engineering/post3_index.html" class="no-external">Teaching a Model to Read an Ingredient List</a>
-</h3>
-<div class="listing-categories">
-
-<div class="listing-category" onclick="window.quartoListingCategory('ZmVhdHVyZSUyMGVuZ2luZWVyaW5n'); return false;">feature engineering</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('cHl0aG9u'); return false;">python</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('cGFja2FnaW5n'); return false;">packaging</div>
-
-</div>
-<div class="delink listing-description"><a href="./posts/03-feature-engineering/post3_index.html" class="no-external">
-<p>Turning messy INCI strings, prices, and brand data into 25 model-ready features — and the Python package that does the parsing.</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/03-feature-engineering/post3_index.html" class="no-external">
-<div class="listing-date">
-Jun 30, 2026
-</div>
-<div class="listing-author">
-Haley Hale
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="ZGF0YSUyMGVuZ2luZWVyaW5nJTJDd2ViJTIwc2NyYXBpbmclMkNwZXJzb25hbCUyMGNhcmU=" data-listing-date-sort="1782367200000" data-listing-file-modified-sort="1782662393227" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1023">
-<div class="thumbnail"><a href="./posts/02-building-the-pipeline/index.html" class="no-external">
-
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/02-building-the-pipeline/index.html" class="no-external">Building the Pipeline: From Raw Scrape to Modeling-Ready Data</a>
-</h3>
-<div class="listing-categories">
-
-<div class="listing-category" onclick="window.quartoListingCategory('ZGF0YSUyMGVuZ2luZWVyaW5n'); return false;">data engineering</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('d2ViJTIwc2NyYXBpbmc='); return false;">web scraping</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('cGVyc29uYWwlMjBjYXJl'); return false;">personal care</div>
-
-</div>
-<div class="delink listing-description"><a href="./posts/02-building-the-pipeline/index.html" class="no-external">
-<p>A walkthrough of how I collected, cleaned, and structured Sephora product and ingredient data for my senior project, from a two-stage Apify scrape to a modeling-ready Unity Catalog table.</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/02-building-the-pipeline/index.html" class="no-external">
-<div class="listing-date">
-Jun 25, 2026
-</div>
-<div class="listing-author">
-Haley Hale
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-categories="aW50cm9kdWN0aW9uJTJDZGF0YSUyMHNjaWVuY2UlMkNwZXJzb25hbCUyMGNhcmU=" data-listing-date-sort="1780120800000" data-listing-file-modified-sort="1780161015420" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="121">
-<div class="thumbnail"><a href="./posts/01-introduction/index.html" class="no-external">
-
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/01-introduction/index.html" class="no-external">What’s Actually in Your Moisturizer? Using Ingredient Data to Predict Consumer Satisfaction</a>
-</h3>
-<div class="listing-categories">
-
-<div class="listing-category" onclick="window.quartoListingCategory('aW50cm9kdWN0aW9u'); return false;">introduction</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('ZGF0YSUyMHNjaWVuY2U='); return false;">data science</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('cGVyc29uYWwlMjBjYXJl'); return false;">personal care</div>
-
-</div>
-<div class="delink listing-description"><a href="./posts/01-introduction/index.html" class="no-external">
-<p>An introduction to my senior project predicting consumer satisfaction in the personal care market using ingredient composition and product attributes.</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/01-introduction/index.html" class="no-external">
-<div class="listing-date">
-May 30, 2026
-</div>
-<div class="listing-author">
-Haley Hale
-</div>
-</a>
-</div>
-</div>
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
